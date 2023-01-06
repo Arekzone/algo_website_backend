@@ -1,5 +1,6 @@
 package com.shop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,18 +11,20 @@ public class Address {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "address_line_1", nullable = false, length = 512)
+    @Column(name = "address_line_1", nullable = true, length = 512)
     private String addressLine1;
 
-    @Column(name = "address_line_2",length=512)
+    @Column(name = "address_line_2",length=512,nullable = true)
     private String addressLine2;
 
-    @Column(name = "city", nullable = false)
+    @Column(name = "city", nullable = true)
     private String city;
 
     @Column(name = "country", nullable = false, length = 75)
     private String country;
 
+
+    @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "local_user_id", nullable = false)
     private LocalUser localUser;
@@ -74,4 +77,6 @@ public class Address {
         this.id = id;
     }
 
+    public void setUser(LocalUser refUser) {
+    }
 }
