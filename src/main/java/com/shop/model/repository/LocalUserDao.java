@@ -17,4 +17,5 @@ public interface LocalUserDao extends ListCrudRepository<LocalUser,Long> {
 
 
 
+
 }

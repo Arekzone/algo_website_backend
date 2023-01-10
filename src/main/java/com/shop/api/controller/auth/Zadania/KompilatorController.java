@@ -3,8 +3,10 @@ package com.shop.api.controller.auth.Zadania;
 import com.google.gson.Gson;
 import com.shop.api.model.JdoodleBody;
 import com.shop.api.model.JdoodleRespond;
+import com.shop.model.LocalUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,26 +18,30 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 @RestController
 @CrossOrigin("*")
 public class KompilatorController {
 
     @PostMapping(value = "/kompilator", produces = "application/json")
-    public ResponseEntity<String> getResult(@AuthenticationPrincipal @RequestBody JdoodleBody jdoodleBody) throws ProtocolException {
+    public ResponseEntity<JdoodleRespond> getResult(@RequestBody JdoodleBody jdoodleBody) throws ProtocolException {
+
         JdoodleRespond jdoodleRespond = null;
-        String output = null;
-        StringBuilder sb = null;
-        String json = null;
-        String s = null;
-        Gson gson = null;
         try {
             URL url = new URL("https://api.jdoodle.com/execute");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
-            String input = "{\"clientId\": \"" + jdoodleBody.getClientId() + "\",\"clientSecret\":\"" + jdoodleBody.getClientSecret() + "\",\"script\":\"" + jdoodleBody.getScript() +
+            JdoodleBody jdoodleBody1 = new JdoodleBody();
+            jdoodleBody.getScript();
+            String inputBody = jdoodleBody.getScript().toString();
+            Pattern pattern = Pattern.compile("\\r?\\n");
+            String sanitized = pattern.matcher(inputBody).replaceAll(" ");
+            jdoodleBody1.setScript(sanitized);
+            String input = "{\"clientId\": \"" + jdoodleBody.getClientId() + "\",\"clientSecret\":\"" + jdoodleBody.getClientSecret() + "\",\"script\":\"" + jdoodleBody1.getScript() +
                     "\",\"language\":\"" + jdoodleBody.getLanguage() + "\",\"versionIndex\":\"" + jdoodleBody.getVersionIndex() + "\"} ";
             OutputStream outputStream = connection.getOutputStream();
             outputStream.write(input.getBytes());
@@ -50,21 +56,31 @@ public class KompilatorController {
                     (connection.getInputStream())));
             jdoodleRespond = new JdoodleRespond();
             System.out.println("Output from JDoodle .... \n");
-            output = bufferedReader.readLine();
-            sb = new StringBuilder();
-            sb.append(output);
-            System.out.println(sb);
-            gson = new Gson();
-            s = gson.toJson(sb);
-            jdoodleRespond.setOutput(output);
+            String output;
+            StringBuilder sb = null;
+            output=bufferedReader.readLine();
+            System.out.println(output);
+            String[] dataArray = output.split(",");
+            String output2 = output.split("output\":\"")[1].split("\",")[0];
+//            for (int i = 0; i < dataArray.length; i++) {
+//                dataArray[i] = dataArray[i].replace("\"", "").replace("\\n","")
+//                        .replace("{","").replace("}","");
+//                dataArray[i] = dataArray[i].split(":")[1];
+//            }
+//            System.out.println(Arrays.toString(dataArray));
+            String output3 = output2.replace("\"","").replace("\\n","");
+            jdoodleRespond.setOutput(output3);
+            jdoodleRespond.setStatusCode("0");
+            jdoodleRespond.setMemory("0");
+            jdoodleRespond.setCpuTime("0");
             JdoodleRespond jdoodleRespond1 = new JdoodleRespond();
-
+            System.out.println(jdoodleRespond.toString());
             connection.disconnect();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return ResponseEntity.ok(s);
+        return ResponseEntity.ok(jdoodleRespond);
     }
 }

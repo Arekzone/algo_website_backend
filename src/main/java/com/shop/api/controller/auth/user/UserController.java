@@ -4,6 +4,7 @@ import com.shop.model.Address;
 import com.shop.model.LocalUser;
 import com.shop.model.repository.AddressDAO;
 import com.shop.model.repository.LocalUserDao;
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("")
-@CrossOrigin
+@CrossOrigin(origins="*")
 public class UserController {
 
     private AddressDAO addressDAO;
@@ -28,7 +29,7 @@ public class UserController {
     public ResponseEntity<List<LocalUser>> getAll(){
         return ResponseEntity.ok(localUserDao.findAll());
     }
-    @GetMapping("/{userId}/address")
+    @GetMapping("/address/{userId}")
     public ResponseEntity<List<Address>> getAddress(@AuthenticationPrincipal LocalUser user, @PathVariable Long userId){
         if(!userHasPermission(user,userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -36,7 +37,7 @@ public class UserController {
         return ResponseEntity.ok(addressDAO.findByLocalUser_Id(userId));
     }
 
-    @PutMapping("/{userId}/address")
+    @PutMapping("/address/{userId}")
     public ResponseEntity<Address> putAddress(@AuthenticationPrincipal LocalUser user,@PathVariable Long userId,
                                               @RequestBody Address address){
         if(!userHasPermission(user,userId)){

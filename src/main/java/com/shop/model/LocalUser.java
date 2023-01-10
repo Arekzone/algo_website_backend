@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "local_user")
@@ -33,20 +35,36 @@ public class LocalUser {
     private String lastName;
     /** The addresses associated with the user. */
 
+
     @JsonIgnore
-    @OneToMany(mappedBy = "localUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "localUser",cascade = CascadeType.REMOVE,orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "localUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Zadania> zadanias = new ArrayList<>();
 
-    public List<Zadania> getZadanias() {
-        return zadanias;
+    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
+    @JoinTable(name="zadania_users",joinColumns = @JoinColumn(name="localuser_id"),
+            inverseJoinColumns = @JoinColumn(name="zadanie_id")
+    )
+    private List<ZadaniaUser> zadaniaUsers;
+
+    @OneToMany(mappedBy = "localUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    private List<Komentarze> komentarzes = new ArrayList<>();
+
+    public List<Komentarze> getKomentarzes() {
+        return komentarzes;
     }
 
-    public void setZadanias(List<Zadania> zadanias) {
-        this.zadanias = zadanias;
+    public void setKomentarzes(List<Komentarze> komentarzes) {
+        this.komentarzes = komentarzes;
+    }
+
+    public List<ZadaniaUser> getZadaniaUsers() {
+        return zadaniaUsers;
+    }
+
+    public void setZadaniaUsers(List<ZadaniaUser> zadaniaUsers) {
+        this.zadaniaUsers = zadaniaUsers;
     }
 
     /**

@@ -1,18 +1,23 @@
 package com.shop.api.controller.auth.Zadania;
 
+import com.shop.model.Komentarze;
 import com.shop.model.LocalUser;
 import com.shop.model.Zadania;
+import com.shop.model.repository.KomentarzeRepository;
+import com.shop.model.repository.LocalUserDao;
 import com.shop.model.repository.ZadaniaDAO;
+import com.shop.model.repository.ZadaniaUserDao;
+import com.shop.service.UserService;
 import com.shop.service.ZadaniaService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/zadania")
@@ -20,10 +25,18 @@ import java.util.List;
 public class ZadaniaController {
     private final ZadaniaService zadaniaService;
     private final ZadaniaDAO zadaniaDAO;
+    private final ZadaniaUserDao zadaniaUserDao;
+    private final UserService userService;
+    private final KomentarzeRepository komentarzeRepository;
+    private final LocalUserDao localUserDao;
 
-    public ZadaniaController(ZadaniaService zadaniaService, ZadaniaDAO zadaniaDAO) {
+    public ZadaniaController(ZadaniaService zadaniaService, ZadaniaDAO zadaniaDAO, ZadaniaUserDao zadaniaUserDao, UserService userService, KomentarzeRepository komentarzeRepository, LocalUserDao localUserDao) {
         this.zadaniaService = zadaniaService;
         this.zadaniaDAO = zadaniaDAO;
+        this.zadaniaUserDao = zadaniaUserDao;
+        this.userService = userService;
+        this.komentarzeRepository = komentarzeRepository;
+        this.localUserDao = localUserDao;
     }
     @GetMapping("/all")
     public ResponseEntity<List<Zadania>> getZadania(){
@@ -34,4 +47,44 @@ public class ZadaniaController {
 //    public ResponseEntity<List<Zadania>> getZadania(@AuthenticationPrincipal LocalUser localUser){
 //        return ResponseEntity.ok();
 //    }
+    @Transactional
+    @PutMapping("{userId}/wykonane/{id}")
+    public void sendWynik(@AuthenticationPrincipal LocalUser user,@RequestBody String wynik,@PathVariable
+                                    Long id, @PathVariable Long userId){
+
+        zadaniaDAO.updateWynikuzytkownika(userId,id,wynik);
+
+    }
+    private boolean userHasPermission(LocalUser user, Long id){
+        return user.getId()==id;
+    }
+    @GetMapping("/komentarze/{id}")
+    public ResponseEntity<List<Komentarze>> getKomentarze(@PathVariable Long id){
+        return ResponseEntity.ok(komentarzeRepository.findByZadania_Id(id));
+
+    }
+    @Transactional
+    @PostMapping("/komentarze/{zadanieId}/{userId}")
+    public ResponseEntity addKomentarz(@AuthenticationPrincipal LocalUser user, @RequestBody String komentarz, @PathVariable Long userId, @PathVariable Long zadanieId){
+        if(!userHasPermission(user,userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Optional<Zadania> zadanie = zadaniaDAO.findById(zadanieId);
+        Optional<LocalUser>localUser = localUserDao.findById(userId);
+        if(zadanie.isPresent()){
+            LocalUser localUser1 = localUser.get();
+            List<Komentarze> komentarzes = new ArrayList<>();
+            Komentarze komentarze = new Komentarze();
+            komentarze.setKomentarz(komentarz);
+            komentarze.setLocalUser(localUser1);
+            Zadania zadania = zadanie.get();
+            komentarze.setZadania(zadania);
+            komentarzes.add(komentarze);
+            komentarzeRepository.save(komentarze);
+            List<Komentarze> komentarzes1 = komentarzeRepository.findByZadania_Id(zadanieId);
+            zadania.setKomentarzes(komentarzes1);
+            zadaniaDAO.save(zadania);
+        }
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
+    }
 }

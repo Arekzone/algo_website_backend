@@ -6,17 +6,19 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Setter
 @Getter
-public class Zadania {
+public class Zadania{
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
         private Long id;
         private boolean checked;
         @NotNull
         private String text;
-        @NotNull
         private String wynikUzytkownika;
         @NotNull
         private String poprawnyWynik;
@@ -25,10 +27,9 @@ public class Zadania {
         @NotNull
         private String nazwaZadania;
 
-
-        @JsonIgnore
-        @ManyToOne(cascade = CascadeType.REMOVE)
-        @JoinColumn(name = "local_user_id")
-        private LocalUser localUser;
+        @ManyToMany(mappedBy = "zadania")
+        private List<ZadaniaUser> zadaniaUsers;
+        @OneToMany
+        private List<Komentarze> komentarzes;
 
 }

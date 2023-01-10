@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 @Getter
 @Setter
 public class JdoodleBody {
+    public String userId;
     public String script;
     public String language;
     private String versionIndex;
