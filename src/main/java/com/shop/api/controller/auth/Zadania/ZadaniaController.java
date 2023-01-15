@@ -1,5 +1,6 @@
 package com.shop.api.controller.auth.Zadania;
 
+import com.shop.api.model.StringKomentarz;
 import com.shop.model.Komentarze;
 import com.shop.model.LocalUser;
 import com.shop.model.Zadania;
@@ -58,24 +59,26 @@ public class ZadaniaController {
     private boolean userHasPermission(LocalUser user, Long id){
         return user.getId()==id;
     }
+    @CrossOrigin
     @GetMapping("/komentarze/{id}")
     public ResponseEntity<List<Komentarze>> getKomentarze(@PathVariable Long id){
         return ResponseEntity.ok(komentarzeRepository.findByZadania_Id(id));
 
     }
+    @CrossOrigin
     @Transactional
     @PostMapping("/komentarze/{zadanieId}/{userId}")
-    public ResponseEntity addKomentarz(@AuthenticationPrincipal LocalUser user, @RequestBody String komentarz, @PathVariable Long userId, @PathVariable Long zadanieId){
-        if(!userHasPermission(user,userId)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+    public ResponseEntity addKomentarz(@AuthenticationPrincipal LocalUser user, @RequestBody StringKomentarz komentarz, @PathVariable Long userId, @PathVariable Long zadanieId){
+
         Optional<Zadania> zadanie = zadaniaDAO.findById(zadanieId);
         Optional<LocalUser>localUser = localUserDao.findById(userId);
         if(zadanie.isPresent()){
             LocalUser localUser1 = localUser.get();
+            System.out.println(localUser1.getId());
             List<Komentarze> komentarzes = new ArrayList<>();
             Komentarze komentarze = new Komentarze();
-            komentarze.setKomentarz(komentarz);
+            String komentarz1 = komentarz.getKomentarz();
+            komentarze.setKomentarz(komentarz1);
             komentarze.setLocalUser(localUser1);
             Zadania zadania = zadanie.get();
             komentarze.setZadania(zadania);

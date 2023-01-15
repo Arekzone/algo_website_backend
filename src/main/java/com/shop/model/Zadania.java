@@ -26,7 +26,8 @@ public class Zadania{
         private String kategoria;
         @NotNull
         private String nazwaZadania;
-
+        @NotNull
+        private String trescSkryptu;
         @ManyToMany(mappedBy = "zadania")
         private List<ZadaniaUser> zadaniaUsers;
         @OneToMany

@@ -69,6 +69,10 @@ public class KompilatorController {
 //            }
 //            System.out.println(Arrays.toString(dataArray));
             String output3 = output2.replace("\"","").replace("\\n","");
+            //walidacja po stronie backendu
+            if(output3.length()>50){
+                output3="Błąd kompilacji";
+            }
             jdoodleRespond.setOutput(output3);
             jdoodleRespond.setStatusCode("0");
             jdoodleRespond.setMemory("0");

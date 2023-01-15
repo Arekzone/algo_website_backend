@@ -12,4 +12,5 @@ public class ZadanieBody {
     private String poprawnyWynik;
     private String nazwaZadania;
     private String kategoria;
+    private String trescSkryptu;
 }
