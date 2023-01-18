@@ -26,7 +26,7 @@ public class ZadaniaService {
         zadania.setText(zadanieBody.getText());
         zadania.setChecked(zadanieBody.isChecked());
         zadania.setWynikUzytkownika(zadanieBody.getWynikUzytkownika());
-        zadania.setTrescSkryptu(zadanieBody.getTrescSkryptu());
+
         zadania.setPoprawnyWynik(zadanieBody.getPoprawnyWynik());
         zadania.setNazwaZadania(zadanieBody.getNazwaZadania());
         zadania.setKategoria(zadanieBody.getKategoria());

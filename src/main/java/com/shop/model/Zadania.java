@@ -26,9 +26,8 @@ public class Zadania{
         private String kategoria;
         @NotNull
         private String nazwaZadania;
-        @NotNull
-        private String trescSkryptu;
         @ManyToMany(mappedBy = "zadania")
+        @JsonIgnore
         private List<ZadaniaUser> zadaniaUsers;
         @OneToMany
         private List<Komentarze> komentarzes;

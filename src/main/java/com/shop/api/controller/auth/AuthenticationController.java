@@ -1,6 +1,7 @@
 package com.shop.api.controller.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.google.gson.Gson;
 import com.shop.api.model.LoginBody;
 import com.shop.api.model.LoginResponse;
 import com.shop.api.model.RegistrationBody;

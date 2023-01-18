@@ -65,7 +65,7 @@ public class ZadaniaController {
         return ResponseEntity.ok(komentarzeRepository.findByZadania_Id(id));
 
     }
-    @CrossOrigin
+
     @Transactional
     @PostMapping("/komentarze/{zadanieId}/{userId}")
     public ResponseEntity addKomentarz(@AuthenticationPrincipal LocalUser user, @RequestBody StringKomentarz komentarz, @PathVariable Long userId, @PathVariable Long zadanieId){
