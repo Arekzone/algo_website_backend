@@ -37,7 +37,6 @@ public class JWTRequestFilter extends OncePerRequestFilter {
             String token = tokenHeader.substring(7);
             try {
                 String username = jwtService.getUsername(token);
-                System.out.println(username);
                 Optional<LocalUser> opUser = localUserDao.findByUsernameIgnoreCase(username);
                 if(opUser.isPresent()){
                     LocalUser user = opUser.get();

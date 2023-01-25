@@ -1,24 +1,26 @@
 package com.shop.api.controller.auth.Zadania;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shop.api.controller.auth.Zadania.kody.TaskDTO;
+import com.shop.api.controller.auth.Zadania.kody.TaskWrapper;
 import com.shop.api.model.StringKomentarz;
-import com.shop.model.Komentarze;
-import com.shop.model.LocalUser;
-import com.shop.model.Zadania;
+import com.shop.api.model.WynikModel;
+import com.shop.model.*;
 import com.shop.model.repository.KomentarzeRepository;
 import com.shop.model.repository.LocalUserDao;
 import com.shop.model.repository.ZadaniaDAO;
-import com.shop.model.repository.ZadaniaUserDao;
+
 import com.shop.service.UserService;
 import com.shop.service.ZadaniaService;
 import jakarta.transaction.Transactional;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/zadania")
@@ -26,18 +28,23 @@ import java.util.Optional;
 public class ZadaniaController {
     private final ZadaniaService zadaniaService;
     private final ZadaniaDAO zadaniaDAO;
-    private final ZadaniaUserDao zadaniaUserDao;
+
     private final UserService userService;
     private final KomentarzeRepository komentarzeRepository;
     private final LocalUserDao localUserDao;
+    private final UserZadanieRepository userZadanieRepository;
+    private final UserZadanie userZadanie;
 
-    public ZadaniaController(ZadaniaService zadaniaService, ZadaniaDAO zadaniaDAO, ZadaniaUserDao zadaniaUserDao, UserService userService, KomentarzeRepository komentarzeRepository, LocalUserDao localUserDao) {
+
+    public ZadaniaController(ZadaniaService zadaniaService, ZadaniaDAO zadaniaDAO, UserService userService, KomentarzeRepository komentarzeRepository, LocalUserDao localUserDao, UserZadanieRepository userZadanieRepository, UserZadanie userZadanie) {
         this.zadaniaService = zadaniaService;
         this.zadaniaDAO = zadaniaDAO;
-        this.zadaniaUserDao = zadaniaUserDao;
+
         this.userService = userService;
         this.komentarzeRepository = komentarzeRepository;
         this.localUserDao = localUserDao;
+        this.userZadanieRepository = userZadanieRepository;
+        this.userZadanie = userZadanie;
     }
     @GetMapping("/all")
     public ResponseEntity<List<Zadania>> getZadania(){
@@ -50,11 +57,27 @@ public class ZadaniaController {
 //    }
     @Transactional
     @PutMapping("{userId}/wykonane/{id}")
-    public void sendWynik(@AuthenticationPrincipal LocalUser user,@RequestBody String wynik,@PathVariable
+    public ResponseEntity<HttpStatus> sendWynik(@AuthenticationPrincipal LocalUser user, @RequestBody WynikModel wynik, @PathVariable
                                     Long id, @PathVariable Long userId){
 
-        zadaniaDAO.updateWynikuzytkownika(userId,id,wynik);
-
+        Optional<LocalUser>localUser = localUserDao.findById(userId);
+        Optional<Zadania> zadania = zadaniaDAO.findById(id);
+        System.out.println(wynik);
+        if(localUser.isPresent()){
+            LocalUser localUser1 = localUser.get();
+            Zadania zadania1 = zadania.get();
+            WynikModel wynikModel = new WynikModel();
+            String wynik1 = wynik.getWynik();
+            if(zadania1.getPoprawnyWynik().equals(wynik1)) {
+                UserZadanie userZadanie1 = new UserZadanie();
+                userZadanie1.setUser(localUser1);
+                userZadanie1.setWynik_uzytkownika(wynik1);
+                userZadanie1.setTask(zadania1);
+                userZadanieRepository.save(userZadanie1);
+                return ResponseEntity.ok(HttpStatus.ACCEPTED);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
     private boolean userHasPermission(LocalUser user, Long id){
         return user.getId()==id;
@@ -64,6 +87,24 @@ public class ZadaniaController {
     public ResponseEntity<List<Komentarze>> getKomentarze(@PathVariable Long id){
         return ResponseEntity.ok(komentarzeRepository.findByZadania_Id(id));
 
+    }
+    @GetMapping("/mostpopular")
+    public ResponseEntity<String> getMostPopular() {
+        List<Object[]> listOfObjects = userZadanieRepository.find12MostDoneTasks();
+        ObjectMapper mapper = new ObjectMapper();
+        List<TaskDTO> taskDTOList = new ArrayList<>();
+        for (Object[] task : listOfObjects) {
+            taskDTOList.add(new TaskDTO((Long) task[0], (Long) task[1]));
+        }
+        TaskWrapper taskWrapper = new TaskWrapper();
+        taskWrapper.setTasks(taskDTOList);
+        String json;
+        try {
+            json = mapper.writeValueAsString(taskDTOList);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok(json);
     }
 
     @Transactional

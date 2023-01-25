@@ -13,4 +13,5 @@ public class ZadanieBody {
     private String nazwaZadania;
     private String kategoria;
     private String trescSkryptu;
+    private String odpowiedz;
 }

@@ -12,10 +12,6 @@ import java.util.Optional;
 
 @Repository
 public interface ZadaniaDAO extends ListCrudRepository<Zadania,Long> {
-    @Modifying
-    @Query("UPDATE Zadania z SET z.wynikUzytkownika = :wynikuzytkownika WHERE z.id IN (SELECT zu.id FROM ZadaniaUser zu WHERE zu.user.id = :userId) AND z.id = :zadanieId")
-    int updateWynikuzytkownika(Long userId, Long zadanieId, String wynikuzytkownika);
-
 
 
 }

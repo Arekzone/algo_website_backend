@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -14,7 +15,7 @@ import java.util.List;
 @Getter
 public class Zadania{
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
         private Long id;
         private boolean checked;
         @NotNull
@@ -26,10 +27,11 @@ public class Zadania{
         private String kategoria;
         @NotNull
         private String nazwaZadania;
-        @ManyToMany(mappedBy = "zadania")
-        @JsonIgnore
-        private List<ZadaniaUser> zadaniaUsers;
         @OneToMany
         private List<Komentarze> komentarzes;
+
+        @Column(name = "odpowiedz", length = 10000)
+        private String odpowiedz;
+
 
 }

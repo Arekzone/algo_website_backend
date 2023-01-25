@@ -1,7 +1,11 @@
 package com.shop.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.scheduling.config.Task;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,6 +14,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "local_user")
+@Getter
+@Setter
 public class LocalUser {
 
     /** Unique id for the user. */
@@ -36,17 +42,6 @@ public class LocalUser {
     /** The addresses associated with the user. */
 
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "localUser",cascade = CascadeType.REMOVE,orphanRemoval = true)
-    private List<Address> addresses = new ArrayList<>();
-
-
-    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
-    @JoinTable(name="zadania_users",joinColumns = @JoinColumn(name="localuser_id"),
-            inverseJoinColumns = @JoinColumn(name="zadanie_id")
-    )
-    private List<ZadaniaUser> zadaniaUsers;
-
     @OneToMany(mappedBy = "localUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     private List<Komentarze> komentarzes = new ArrayList<>();
@@ -59,124 +54,6 @@ public class LocalUser {
         this.komentarzes = komentarzes;
     }
 
-    public List<ZadaniaUser> getZadaniaUsers() {
-        return zadaniaUsers;
-    }
 
-    public void setZadaniaUsers(List<ZadaniaUser> zadaniaUsers) {
-        this.zadaniaUsers = zadaniaUsers;
-    }
-
-    /**
-     * Gets the addresses.
-     * @return The addresses.
-     */
-    public List<Address> getAddresses() {
-        return addresses;
-    }
-
-    /**
-     * Sets the addresses.
-     * @param addresses The addresses.
-     */
-    public void setAddresses(List<Address> addresses) {
-        this.addresses = addresses;
-    }
-
-    /**
-     * Gets the last name.
-     * @return The last name.
-     */
-    public String getLastName() {
-        return lastName;
-    }
-
-    /**
-     * Sets the last name.
-     * @param lastName The last name.
-     */
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    /**
-     * Gets the first name.
-     * @return The first name.
-     */
-    public String getFirstName() {
-        return firstName;
-    }
-
-    /**
-     * Sets the first name.
-     * @param firstName The first name.
-     */
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    /**
-     * Gets the email.
-     * @return The email.
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets the email.
-     * @param email The email.
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * Gets the encrypted password.
-     * @return The password.
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets the password, this should be pre-encrypted.
-     * @param password The password.
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * Gets the username.
-     * @return The username.
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Sets the username.
-     * @param username The username.
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
-     * Gets the id.
-     * @return The id.
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Sets the id.
-     * @param id The id.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
 
 }
